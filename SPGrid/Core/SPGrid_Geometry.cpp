@@ -11,7 +11,7 @@ using namespace SPGrid;
 // Function Check_Bounds
 //#####################################################################
 void SPGrid_Geometry<3>::
-Check_Bounds(const unsigned int i,const unsigned int j,const unsigned int k) const
+Check_Bounds(const ucoord_t i,const ucoord_t j,const ucoord_t k) const
 {
     if(i>=xsize_padded || j>=ysize_padded || k>=zsize_padded)
         FATAL_ERROR("Array indices ("+Value_To_String(i)+","+Value_To_String(j)+","+Value_To_String(k)+") out of hard bounds");
@@ -20,7 +20,7 @@ Check_Bounds(const unsigned int i,const unsigned int j,const unsigned int k) con
 }
 //#####################################################################
 void SPGrid_Geometry<2>::
-Check_Bounds(const unsigned int i,const unsigned int j) const
+Check_Bounds(const ucoord_t i,const ucoord_t j) const
 {
     if(i>=xsize_padded || j>=ysize_padded)
         FATAL_ERROR("Array indices ("+Value_To_String(i)+","+Value_To_String(j)+") out of hard bounds");

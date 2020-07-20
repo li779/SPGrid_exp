@@ -1,8 +1,9 @@
 //#####################################################################
-// Copyright (c) 2012-2016, Mridul Aanjaneya, Sean Bauer, Eftychios Sifakis.
+// Copyright (c) 2012-2013, Sean Bauer, Eftychios Sifakis.
 // Distributed under the FreeBSD license (see license.txt)
 //#####################################################################
 // Utility classes/functions
+//! @file
 //#####################################################################
 #ifndef __SPGrid_Utilities_h__
 #define __SPGrid_Utilities_h__
@@ -13,43 +14,47 @@
 
 namespace SPGrid{
 
-template<unsigned d> struct BitLength;
-template<> struct BitLength<0> {enum {value=0};};
-template<unsigned d> struct BitLength {enum {value=1+BitLength<(d>>1)>::value};};
-template<unsigned d> struct NextLogTwo {enum {value=BitLength<d-1>::value};};
+typedef uint32_t ucoord_t;
+typedef int32_t scoord_t;
 
+//! @struct BitLength
+//! Class BitLength computes the bit-length of its template parameter at compile time. It is used primarily to quantize the size of struct's passed to SPGrid_Allocator to the next
+//! power of two.
+//! @brief Bit-length of integer template argument
+//! @tparam d Integer input whose bit length is to be computed
+
+template<int d> struct BitLength;
+template<> struct BitLength<0> {enum {value=0};};
+template<int d> struct BitLength {enum {value/*!< Bit length of template parameter */ =1+BitLength<(d>>1)>::value};};
+template<int d> struct NextLogTwo {enum {value=BitLength<d-1>::value};};
+
+//! Computes the byte offset of a member within a class. The member is specified by means of a pointer-to-member. For example, if seeking the byte offset of float-valued member
+//! *my_float* within the struct *my_struct*, the argument passed to this function should be \& *my_struct::my_float*.
+//! @tparam T_FIELD Type of the member being localized
+//! @tparam T A class type containing a member field of type T
+//! @param field Pointer to a member (of type T_FIELD) of class T
+//! @return Offset, in bytes, of specified struct member
 template<class T,class T_FIELD> size_t
 OffsetOfMember(T_FIELD T::*field)
 {return (size_t)((char*)&(((T*)0)->*field)-(char*)0);}
 
-template<class T,class T1,class T2> struct EnableIfSame {};
-template<class T,class T1> struct EnableIfSame<T,T1,T1> {typedef T type;};
-
-inline unsigned Next_Power_Of_Two(unsigned i)
+//! Rounds-up (at run-time) the input parameter to the closest power of two.
+//! @param i Integer argument to be rounded up to a power of two.
+//! @return Lowest power of two that is greater or equal than the input parameter.
+inline uint32_t Next_Power_Of_Two(uint32_t i)
 {i--;i|=i>>1;i|=i>>2;i|=i>>4;i|=i>>8;i|=i>>16;return i+1;}
-
-template<class T> inline T max(const T& x1, const T& x2)
-{return std::max(x1,x2);}
-
-template<class T> inline T max(const T& x1, const T& x2,const T& x3)
-{return std::max(x1,std::max(x2,x3));}
-
-template<class T> inline T max(const T& x1, const T& x2,const T& x3, const T& x4)
-{return std::max(std::max(x1,x2),std::max(x3,x4));}
 
 template<class T> std::string Value_To_String(const T& value)
 {std::ostringstream output;output<<value;return output.str();}
 
 #ifdef HASWELL
-unsigned long Bit_Spread(const unsigned long data,const unsigned long mask);
-unsigned long Bit_Spread(const unsigned int data,const unsigned long mask);
-unsigned long Bit_Spread(const int data,const unsigned long mask);
+uint64_t Bit_Spread(const ucoord_t data,const uint64_t mask);
+uint64_t Bit_Spread(const scoord_t data,const uint64_t mask);
 #else
-template<unsigned long mask,class T_INT>
-unsigned long Bit_Spread(const T_INT data)
+template<uint64_t mask>
+inline uint64_t Bit_Spread_u64(uint64_t uldata)
 {
-    unsigned long uldata=data;
-    unsigned long result=0;
+    uint64_t result=0;
 
     if(0x0000000000000001UL & mask) result |= uldata & 0x0000000000000001UL; else uldata <<= 1;
     if(0x0000000000000002UL & mask) result |= uldata & 0x0000000000000002UL; else uldata <<= 1;
@@ -118,34 +123,25 @@ unsigned long Bit_Spread(const T_INT data)
 
     return result;
 }
+template<uint64_t mask> uint64_t Bit_Spread(const ucoord_t data)
+{uint64_t uldata=data;return Bit_Spread_u64<mask>(uldata);}
+template<uint64_t mask> uint64_t Bit_Spread(const scoord_t data)
+{union{ int64_t sldata; uint64_t uldata; };sldata=data;return Bit_Spread_u64<mask>(uldata);}
 #endif
 
-int Bit_Pack(const unsigned long data, const unsigned long mask);
+scoord_t Bit_Pack(const uint64_t data, const uint64_t mask);
 
-template<unsigned long data,unsigned long mask,unsigned long bit=1UL> struct BitSpread;
-template<unsigned long data,unsigned long mask> struct BitSpread<data,mask,0> { static const unsigned long value=0; };
-template<unsigned long data,unsigned long mask,unsigned long bit> struct BitSpread
-{ static const unsigned long value = (bit & mask ) ? BitSpread<data,mask,bit<<1>::value | (data & bit) : BitSpread<data<<1,mask,bit<<1>::value; };
+template<uint64_t data,uint64_t mask,uint64_t bit=1UL> struct BitSpread;
+template<uint64_t data,uint64_t mask> struct BitSpread<data,mask,0> { static const uint64_t value=0; };
+template<uint64_t data,uint64_t mask,uint64_t bit> struct BitSpread
+{ static const uint64_t value = (bit & mask ) ? BitSpread<data,mask,bit<<1>::value | (data & bit) : BitSpread<data<<1,mask,bit<<1>::value; };
 
 #define FATAL_ERROR(...) \
     Fatal_Error((const char*)__FUNCTION__,__FILE__,__LINE__,##__VA_ARGS__)
 
-void Fatal_Error(const char* function,const char* file,unsigned int line) __attribute__ ((noreturn)) ;
-void Fatal_Error(const char* function,const char* file,unsigned int line,const char* message) __attribute__ ((noreturn)) ;
-void Fatal_Error(const char* function,const char* file,unsigned int line,const std::string& message) __attribute__ ((noreturn)) ;
-
-#define SPGRID_JOIN( X, Y ) SPGRID_DO_JOIN( X, Y )
-#define SPGRID_DO_JOIN( X, Y ) SPGRID_DO_JOIN2(X,Y)
-#define SPGRID_DO_JOIN2( X, Y ) X##Y
-
-template <bool x> struct STATIC_ASSERTION_FAILURE;
-template <> struct STATIC_ASSERTION_FAILURE<true> { enum { value = 1 }; };
-template<int x> struct static_assert_test{};
-#define SPGRID_STATIC_ASSERT( B ) \
-   typedef static_assert_test<\
-      sizeof(STATIC_ASSERTION_FAILURE< (bool)( B ) >)>\
-         SPGRID_JOIN(boost_static_assert_typedef_, __LINE__)
-#define Static_Assert(...) SPGRID_STATIC_ASSERT((__VA_ARGS__))
+void Fatal_Error(const char* function,const char* file,int line) __attribute__ ((noreturn)) ;
+void Fatal_Error(const char* function,const char* file,int line,const char* message) __attribute__ ((noreturn)) ;
+void Fatal_Error(const char* function,const char* file,int line,const std::string& message) __attribute__ ((noreturn)) ;
 
 // Used during allocation
 void Check_Compliance();
@@ -154,10 +150,10 @@ void Raw_Deallocate(void* data, const size_t size);
 void Deactivate_Page(void* data, const size_t size);
 
 // Used to check address resident
-bool Check_Address_Resident(const void* addr);
+void Check_Address_Resident(const void* addr);
 
 // Check whether physically-mapped pages are correctly registered
-void Validate_Memory_Use(unsigned long number_of_pages,void *data_ptr,unsigned long *page_mask_array);
+void Validate_Memory_Use(uint64_t number_of_pages,void *data_ptr,uint64_t *page_mask_array);
 
 }
 #endif

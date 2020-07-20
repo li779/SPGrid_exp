@@ -7,7 +7,7 @@
 #ifndef __SPGrid_Array_h__
 #define __SPGrid_Array_h__
 
-// #define SPGRID_CHECK_BOUNDS
+//#define SPGRID_CHECK_BOUNDS
 
 #include <SPGrid/Core/SPGrid_Geometry.h>
 
@@ -31,114 +31,99 @@ public:
         :data_ptr(data_ptr_input),geometry(geometry_input)
     {}
 
-    inline T& operator()(const std_array<unsigned int,3>& coord)
+    inline T& operator()(const std::array<ucoord_t,3>& coord)
     {
-        Static_Assert(dim==3);
+        static_assert(dim==3,"Dimension mismatch");
 #ifdef SPGRID_CHECK_BOUNDS
-        geometry.Check_Bounds(coord.data[0],coord.data[1],coord.data[2]);
+        geometry.Check_Bounds(coord[0],coord[1],coord[2]);
 #endif        
-        return *reinterpret_cast<T*>(reinterpret_cast<unsigned long>(data_ptr)+T_MASK::Linear_Offset(coord));
+        return *reinterpret_cast<T*>(reinterpret_cast<uint64_t>(data_ptr)+T_MASK::Linear_Offset(coord));
     }
     
-    inline T& operator()(const std_array<unsigned int,2>& coord)
+    inline T& operator()(const std::array<ucoord_t,2>& coord)
     {
-        Static_Assert(dim==2);
+        static_assert(dim==2,"Dimension mismatch");
 #ifdef SPGRID_CHECK_BOUNDS
-        geometry.Check_Bounds(coord.data[0],coord.data[1]);
+        geometry.Check_Bounds(coord[0],coord[1]);
 #endif        
-        return *reinterpret_cast<T*>(reinterpret_cast<unsigned long>(data_ptr)+T_MASK::Linear_Offset(coord));
+        return *reinterpret_cast<T*>(reinterpret_cast<uint64_t>(data_ptr)+T_MASK::Linear_Offset(coord));
     }
 
-    inline T& operator()(const std_array<int,3>& coord)
+    inline T& operator()(const std::array<scoord_t,3>& coord)
     {
-        Static_Assert(dim==3);
+        static_assert(dim==3,"Dimension mismatch");
 #ifdef SPGRID_CHECK_BOUNDS
-        geometry.Check_Bounds(coord.data[0],coord.data[1],coord.data[2]);
+        geometry.Check_Bounds(coord[0],coord[1],coord[2]);
 #endif        
-        return *reinterpret_cast<T*>(reinterpret_cast<unsigned long>(data_ptr)+T_MASK::Linear_Offset(coord));
+        return *reinterpret_cast<T*>(reinterpret_cast<uint64_t>(data_ptr)+T_MASK::Linear_Offset(coord));
     }
     
-    inline T& operator()(const std_array<int,2>& coord)
+    inline T& operator()(const std::array<scoord_t,2>& coord)
     {
-        Static_Assert(dim==2);
+        static_assert(dim==2,"Dimension mismatch");
 #ifdef SPGRID_CHECK_BOUNDS
-        geometry.Check_Bounds(coord.data[0],coord.data[1]);
+        geometry.Check_Bounds(coord[0],coord[1]);
 #endif        
-        return *reinterpret_cast<T*>(reinterpret_cast<unsigned long>(data_ptr)+T_MASK::Linear_Offset(coord));
+        return *reinterpret_cast<T*>(reinterpret_cast<uint64_t>(data_ptr)+T_MASK::Linear_Offset(coord));
     }
     
-    inline T& operator()(const unsigned int i,const unsigned int j,const unsigned int k)
+    inline T& operator()(const ucoord_t i,const ucoord_t j,const ucoord_t k)
     {
-        Static_Assert(dim==3);
+        static_assert(dim==3,"Dimension mismatch");
 #ifdef SPGRID_CHECK_BOUNDS
         geometry.Check_Bounds(i,j,k);
 #endif        
-        return *reinterpret_cast<T*>(reinterpret_cast<unsigned long>(data_ptr)+T_MASK::Linear_Offset(i,j,k));
+        return *reinterpret_cast<T*>(reinterpret_cast<uint64_t>(data_ptr)+T_MASK::Linear_Offset(i,j,k));
     }
     
-    inline T& operator()(const unsigned long offset)
+    inline T& operator()(const ucoord_t i,const ucoord_t j)
     {
-        return *reinterpret_cast<T*>(reinterpret_cast<unsigned long>(data_ptr)+offset);
-    }
-
-// *** New templatized versions
-    template<int di, int dj>
-    inline T& operator()(const unsigned long offset)
-    {
-        Static_Assert(dim==2);
-        return *reinterpret_cast<T*>(reinterpret_cast<unsigned long>(data_ptr)+T_MASK::Packed_Offset<di,dj>(offset));
-    }
-    template<int di, int dj, int dk>
-    inline T& operator()(const unsigned long offset)
-    {
-        Static_Assert(dim==3);
-        return *reinterpret_cast<T*>(reinterpret_cast<unsigned long>(data_ptr)+T_MASK::Packed_Offset<di,dj,dk>(offset));
-    }
-
-    inline T& operator()(const unsigned int i,const unsigned int j)
-    {
-        Static_Assert(dim==2);
+        static_assert(dim==2,"Dimension mismatch");
 #ifdef SPGRID_CHECK_BOUNDS
         geometry.Check_Bounds(i,j);
 #endif        
-        return *reinterpret_cast<T*>(reinterpret_cast<unsigned long>(data_ptr)+T_MASK::Linear_Offset(i,j));
+        return *reinterpret_cast<T*>(reinterpret_cast<uint64_t>(data_ptr)+T_MASK::Linear_Offset(i,j));
     }
 
-// *** Templatized Get's
-    template<int di, int dj>
-    inline T& Get(unsigned long offset)
+    inline T& operator()(const uint64_t offset)
     {
-        Static_Assert(dim==2);
-        return *reinterpret_cast<T*>(reinterpret_cast<unsigned long>(data_ptr)+T_MASK::Packed_Offset<di,dj>(offset));
+        return *reinterpret_cast<T*>(reinterpret_cast<uint64_t>(data_ptr)+offset);
     }
 
     template<int di, int dj, int dk>
-    inline T& Get(unsigned long offset)
+    inline T& operator()(const uint64_t offset)
     {
-        Static_Assert(dim==3);
-        return *reinterpret_cast<T*>(reinterpret_cast<unsigned long>(data_ptr)+T_MASK::Packed_Offset<di,dj,dk>(offset));
+        static_assert(dim==3,"Dimension mismatch");
+        return *reinterpret_cast<T*>(reinterpret_cast<uint64_t>(data_ptr)+T_MASK::Packed_Offset<di,dj,dk>(offset));
+    }
+
+    template<int di, int dj>
+    inline T& operator()(const uint64_t offset)
+    {
+        static_assert(dim==2,"Dimension mismatch");
+        return *reinterpret_cast<T*>(reinterpret_cast<uint64_t>(data_ptr)+T_MASK::Packed_Offset<di,dj>(offset));
     }
 
     // Debug_Get() functions operate like the operator parenthesis, but also check if the memory address is resident
-    T& Debug_Get(const unsigned int i,const unsigned int j,const unsigned int k)
+    T& Debug_Get(const ucoord_t i,const ucoord_t j,const ucoord_t k)
     {
-        Static_Assert(dim==3);
+        static_assert(dim==3,"Dimension mismatch");
 #ifdef SPGRID_CHECK_BOUNDS
         geometry.Check_Bounds(i,j,k);
 #endif        
-        T* addr=reinterpret_cast<T*>(reinterpret_cast<unsigned long>(data_ptr)+T_MASK::Linear_Offset(i,j,k));
-        if(!Check_Address_Resident(addr)) FATAL_ERROR("In Check_Address_Resident() : Input address "+Value_To_String(addr)+" is not resident in physical memory");
+        T* addr=reinterpret_cast<T*>(reinterpret_cast<uint64_t>(data_ptr)+T_MASK::Linear_Offset(i,j,k));
+        Check_Address_Resident(addr);
         return *addr;
     }
 
-    T& Debug_Get(const unsigned int i,const unsigned int j)
+    T& Debug_Get(const ucoord_t i,const ucoord_t j)
     {
-        Static_Assert(dim==2);
+        static_assert(dim==2,"Dimension mismatch");
 #ifdef SPGRID_CHECK_BOUNDS
         geometry.Check_Bounds(i,j);
 #endif        
-        T* addr=reinterpret_cast<T*>(reinterpret_cast<unsigned long>(data_ptr)+T_MASK::Linear_Offset(i,j));
-        if(!Check_Address_Resident(addr)) FATAL_ERROR("In Check_Address_Resident() : Input address "+Value_To_String(addr)+" is not resident in physical memory");
+        T* addr=reinterpret_cast<T*>(reinterpret_cast<uint64_t>(data_ptr)+T_MASK::Linear_Offset(i,j));
+        Check_Address_Resident(addr);
         return *addr;
     }
 
