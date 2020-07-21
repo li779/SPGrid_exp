@@ -1,6 +1,6 @@
 #ifndef __Init__
 #define __Init__
-
+#pragma once
 
 #include "Config.h"
 
@@ -20,8 +20,8 @@ void initialize(array_t& x, array_t& f, array_t& p, array_t& r, array_t& z, Mask
         // if(radiusSquared > ... || radiusSquared < ...) continue;
 
         auto floatOffset = FloatMaskType::Linear_Offset(i, j, k);
-        x[i][j][k]  = x_array(floatOffset)  = (float) (i+j+k);
-        f[i][j][k]  = f_array(floatOffset)  = (float) (i+j+k);
+        x[i][j][k]  = x_array(floatOffset)  = (float) (i+j+k)/(3*XDIM);
+        f[i][j][k]  = f_array(floatOffset)  = (float) (i+j+k)/(3*XDIM);
         p[i][j][k] = p_array(floatOffset) = (float) 0;
         r[i][j][k] = r_array(floatOffset) = (float) 0;
         z[i][j][k] = z_array(floatOffset) = (float) 0;
@@ -35,6 +35,25 @@ void initialize(array_t& x, array_t& f, array_t& p, array_t& r, array_t& z, Mask
         mask_array(i, j, k) |= MyFlags::zExistsFlag;
 
     pageMap.Update_Block_Offsets();
+};
+
+void check(array_t& x, DataArrayType& x_array){
+    for (int i = 0; i < XDIM; i++)
+    for (int j = 0; j < YDIM; j++)
+    for (int k = 0; k < ZDIM; k++)
+    {
+        // uint64_t radiusSquared =
+        //     uint64_t(i-XDIM/2) * uint64_t(i-XDIM/2) +
+        //     uint64_t(j-YDIM/2) * uint64_t(j-YDIM/2) +
+        //     uint64_t(k-ZDIM/2) * uint64_t(k-ZDIM/2);
+        // if(radiusSquared > ... || radiusSquared < ...) continue;
+
+        auto floatOffset = FloatMaskType::Linear_Offset(i, j, k);
+        if(std::abs(x[i][j][k]-x_array(floatOffset))>0.1){
+            std::cout << "at location: (" << i << ", " << j << ", "<< k << ") Without SPGrid value: " << x[i][j][k] << "With SPGrid value: "<< x_array(floatOffset)<< std::endl;
+        }
+    }
+    std::cout << "check complete"<< std::endl;
 };
 
 

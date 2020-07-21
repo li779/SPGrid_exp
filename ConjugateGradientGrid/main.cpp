@@ -35,20 +35,18 @@ int main(int argc, char *argv[])
     DataArrayType z_array = allocator.Get_Array(&ConjugateGradientStruct::z);
     MaskArrayType mask_array = allocator.Get_Array(&ConjugateGradientStruct::mask);
 
-
+    Timer timer;
     // Initialization
     {
-        Timer timer;
         timer.Start();
-        InitializeProblem(x, f);
+        //InitializeProblem(x, f);
         matrix1 = BuildLaplacianMatrix(); // This takes a while ...
         matrix2 = BuildLaplacianMatrixLowerTriangular(); // This takes a while ...
         timer.Stop("Initialization : ");
     }
 
     {
-        Timer timer;
-        timer.Start();
+        timer.Restart();
         initialize(x, f, p, r, z, mask_array, pageMap, x_array, f_array, p_array, r_array, z_array);
         timer.Stop("Initialization : ");
     }
@@ -57,6 +55,12 @@ int main(int argc, char *argv[])
     timerLaplacian.Reset();
     ConjugateGradients(matrix1, matrix2, x, f, p, r, z, false);
     timerLaplacian.Print("Total Laplacian Time : ");
+
+    timerLaplacian.Reset();
+    SPGridConjugateGradients( x_array, f_array, p_array, r_array, z_array, mask_array, allocator.Elements_Per_Block(), pageMap.Get_Blocks().second, pageMap.Get_Blocks().first);
+    timerLaplacian.Print("Total Laplacian Time : ");
+
+    check(x,x_array);
 
     return 0;
 }

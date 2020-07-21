@@ -2,9 +2,9 @@
 #include <SPGrid/Core/SPGrid_Page_Map.h>
 #pragma once
 
-#define XDIM 512
-#define YDIM 512
-#define ZDIM 512
+// #define XDIM 512
+// #define YDIM 512
+// #define ZDIM 512
 
 
 using namespace SPGrid;

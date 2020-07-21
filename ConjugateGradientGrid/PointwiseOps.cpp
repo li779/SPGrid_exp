@@ -22,7 +22,7 @@ void Saxpy(const float (&x)[XDIM][YDIM][ZDIM], const float (&y)[XDIM][YDIM][ZDIM
 
 
 
-void Copy(const DataArrayType& x_array, DataArrayType& y_array, MaskArrayType& mask_array,
+void SPGridCopy(DataArrayType& x_array, DataArrayType& y_array, MaskArrayType& mask_array,
     const unsigned nElementsPerBlock, const unsigned block_size, const uint64_t* blocks){
     
     #pragma omp parallel for
@@ -39,7 +39,7 @@ void Copy(const DataArrayType& x_array, DataArrayType& y_array, MaskArrayType& m
 }
 
 
-void Saxpy(const DataArrayType& x_array, const DataArrayType& y_array, DataArrayType& z_array, 
+void SPGridSaxpy(DataArrayType& x_array, DataArrayType& y_array, DataArrayType& z_array, 
     MaskArrayType& mask_array,const unsigned nElementsPerBlock, const unsigned block_size, const uint64_t* blocks, const float scale){
 
     //#pragma omp parallel for

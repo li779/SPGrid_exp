@@ -1,7 +1,8 @@
+#include "CSRMatrixHelper.h"
 #include "Laplacian.h"
+#include "MatVecMultiply.h"
 
-namespace SPGrid{
-void SPGridLaplacian(DataArrayType& u_array, DataArrayType& Lu_array, MaskArrayType& mask_array,const unsigned nElementsPerBlock, const unsigned block_size, const uint64_t* blocks)
+void SPGridLaplacian(DataArrayType& u_array, DataArrayType& Lu_array,MaskArrayType& mask_array,const unsigned nElementsPerBlock, const unsigned block_size, const uint64_t* blocks)
 {
     
     std::cout << "blocks.second = " <<block_size << std::endl;
@@ -14,7 +15,7 @@ void SPGridLaplacian(DataArrayType& u_array, DataArrayType& Lu_array, MaskArrayT
         auto offset = blockOffset;
 
         for (int e = 0; e < nElementsPerBlock; e++, offset += sizeof(float))
-            if (maskPtr[e] & MyFlags::LuExistsFlag)
+            if (maskPtr[e] & MyFlags::zExistsFlag)
                 Lu_array(offset) =
                     -6 * u_array.operator()<0,0,0>(offset)
                         + u_array.operator()<+1,0,0>(offset)
@@ -82,4 +83,4 @@ void ComputeLaplacian(CSRMatrix& laplacianMatrix,
     else
         MatVecMultiply(laplacianMatrix, &u[0][0][0], &Lu[0][0][0]);
 }
-}
+

@@ -2,6 +2,7 @@
 
 #include "Parameters.h"
 #include "CSRMatrix.h"
+#include "Config.h"
 
 void ConjugateGradients(
     CSRMatrix& matrix1,
@@ -13,7 +14,14 @@ void ConjugateGradients(
     float (&z)[XDIM][YDIM][ZDIM],
     const bool writeIterations = true);
 
-void SPGridConjugateGradients(DataArrayType& x_array, const DataArrayType& f_array, DataArrayType& p_array,
-    DataArrayType& r_array, DataArrayType& z_array, const MaskArrayType& mask_array,
-    const unsigned nElementsPerBlock, const unsigned block_size, const uint64_t* blocks);
+void SPGridConjugateGradients(
+    DataArrayType& x_array, 
+    DataArrayType& f_array, 
+    DataArrayType& p_array,
+    DataArrayType& r_array, 
+    DataArrayType& z_array, 
+    MaskArrayType& mask_array,
+    const unsigned nElementsPerBlock, 
+    const unsigned block_size, 
+    const uint64_t* blocks);
 
