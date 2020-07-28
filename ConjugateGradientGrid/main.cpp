@@ -53,11 +53,15 @@ int main(int argc, char *argv[])
 
     // Call Conjugate Gradients algorithm
     timerLaplacian.Reset();
+    timer.Reset(); timer.Restart();
     ConjugateGradients(matrix1, matrix2, x, f, p, r, z, false);
+    timer.Stop("Original Conjugate Gradient time: ");
     timerLaplacian.Print("Total Laplacian Time : ");
 
     timerLaplacian.Reset();
+    timer.Reset(); timer.Restart();
     SPGridConjugateGradients( x_array, f_array, p_array, r_array, z_array, mask_array, allocator.Elements_Per_Block(), pageMap.Get_Blocks().second, pageMap.Get_Blocks().first);
+    timer.Stop("SPGrid Conjugate Gradient time: ");
     timerLaplacian.Print("Total Laplacian Time : ");
 
     check(x,x_array);
