@@ -2,29 +2,14 @@
 #include "Timer.h"
 #include <math.h>
 #include "Laplacian.h"
-
+#include "SPGridOperator.h"
 
 // #define XDIM 512
 // #define YDIM 512
 // #define ZDIM 512
-#define LIMIT 0.001
-
+// #define LIMIT 0.001
 
 using namespace vdb;
-
-struct MyStruct
-{
-    float u;
-    float Lu;
-    uint32_t mask;
-
-    bool operator!= (const MyStruct& compStruct) const{
-        return (std::abs(u-compStruct.u)>LIMIT) ||
-               (std::abs(Lu-compStruct.Lu)>LIMIT) ||
-               (mask!=compStruct.mask);
-    }
-    void copy(const MyStruct& compStruct){u=compStruct.u; Lu=compStruct.Lu; mask=compStruct.mask;}
-};
 
 enum MyFlags : uint32_t {
     uExistsFlag = 0x00000001,
@@ -34,6 +19,7 @@ enum MyFlags : uint32_t {
 using VDBTree = Tree<RootNode<InternalNode<InternalNode<LeafNode<MyStruct, 3>, 4>, 5> > >;
 using VDBAccessor = ValueAccessor<VDBTree>;
 using array_t = float (&) [XDIM][YDIM][ZDIM];
+using SPGridOperatorType = SPGridOperator<VDBTree>;
 
 
 void initialize(array_t& u, array_t& Lu, VDBAccessor& accessor){
@@ -53,7 +39,6 @@ void initialize(array_t& u, array_t& Lu, VDBAccessor& accessor){
             data.mask |= MyFlags::LuExistsFlag;
         accessor.setValue(index, data);
     }
-    
 }
 
 void vdbLaplacian(VDBAccessor& accessor){
@@ -107,6 +92,7 @@ int main(int argc, char *argv[])
     
     // Initialization
     initialize( u, Lu, accessor);
+    SPGridOperatorType SPGridOperator;
 
     Timer timer;
 

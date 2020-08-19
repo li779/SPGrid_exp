@@ -47,6 +47,8 @@
 #ifndef VDB_H_HAS_BEEN_INCLUDED
 #define VDB_H_HAS_BEEN_INCLUDED
 
+#pragma once
+
 // optionally replace a sorted map in the root node with a hash table.
 // OpenVDB employes a sorted map but the VDB paper also discusses the
 // potential benefits of using a hash table so we include both.
