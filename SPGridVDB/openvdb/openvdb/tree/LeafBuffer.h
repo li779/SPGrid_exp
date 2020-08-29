@@ -138,6 +138,8 @@ public:
     explicit inline LeafBuffer(const ValueType&);
     /// Copy constructor
     inline LeafBuffer(const LeafBuffer&);
+    /// Construct a buffer with allocated memory
+    inline LeafBuffer(ValueType& data): mData(data){};
     /// Construct a buffer but don't allocate memory for the full array of values.
     LeafBuffer(PartialCreate, const ValueType&): mData(nullptr) { mOutOfCore = 0; }
     /// Destructor
